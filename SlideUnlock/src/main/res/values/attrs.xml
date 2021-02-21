@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SlideUnlockView">
+        <attr name="trackBgColor" format="color" />
+        <attr name="trackBgRadius" format="dimension"></attr>
+        <attr name="trackPadding" format="dimension" />
+        <attr name="thumbUnPressBgColor" format="dimension" />
+        <attr name="thumbPressBgColor" format="color" />
+    </declare-styleable>
+</resources>
