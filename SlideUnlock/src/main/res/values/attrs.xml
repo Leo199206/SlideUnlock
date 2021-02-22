@@ -2,9 +2,17 @@
 <resources>
     <declare-styleable name="SlideUnlockView">
         <attr name="trackBgColor" format="color" />
-        <attr name="trackBgRadius" format="dimension"></attr>
-        <attr name="trackPadding" format="dimension" />
-        <attr name="thumbUnPressBgColor" format="dimension" />
-        <attr name="thumbPressBgColor" format="color" />
+        <attr name="trackRoundCorner" format="dimension" />
+        <attr name="thumbBgColor" format="color" />
+        <attr name="thumbPadding" format="dimension" />
+        <attr name="thumbSrcTint" format="color" />
+        <attr name="thumbSrc" format="reference" />
+        <attr name="thumbWidth" format="dimension" />
+        <attr name="duration" format="integer" />
+        <attr name="unlockLockText" format="string" />
+        <attr name="shapeType">
+            <enum name="CIRCLE" value="0" />
+            <enum name="SQUARE" value="1" />
+        </attr>
     </declare-styleable>
 </resources>
