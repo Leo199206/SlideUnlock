@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <com.slide.unlock.SlideUnlockView
+    <com.slide.unlock.view.SlideUnlockView
         android:id="@+id/slide_circle"
         android:layout_width="250dp"
         android:layout_height="50dp"
@@ -29,7 +29,7 @@
         app:unlockLockTextSize="16sp" />
 
 
-    <com.slide.unlock.SlideUnlockView
+    <com.slide.unlock.view.SlideUnlockView
         android:id="@+id/slide_square"
         android:layout_width="250dp"
         android:layout_height="50dp"

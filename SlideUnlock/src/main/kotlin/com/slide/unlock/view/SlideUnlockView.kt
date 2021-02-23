@@ -1,4 +1,4 @@
-package com.slide.unlock
+package com.slide.unlock.view
 
 import android.animation.ValueAnimator
 import android.content.Context
@@ -13,6 +13,9 @@ import androidx.annotation.Px
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
+import com.slide.unlock.OnSlideUnlockCallback
+import com.slide.unlock.R
+import com.slide.unlock.ThumbShape
 import kotlin.math.abs
 
 
@@ -519,6 +522,15 @@ open class SlideUnlockView : View {
             }
         }
         return true
+    }
+
+
+    /**
+     * 解锁状态回调
+     * @param callback OnSlideUnlockCallback
+     */
+    fun setSlideUnlockCallback(callback: OnSlideUnlockCallback) {
+        this.unlockCallback = callback
     }
 
     /**
