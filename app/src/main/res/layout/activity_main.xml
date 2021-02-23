@@ -12,21 +12,21 @@
         android:layout_height="50dp"
         android:layout_marginBottom="20dp"
         android:padding="2dp"
-        app:duration="500"
         app:layout_constraintBottom_toTopOf="@id/slide_square"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:resilienceDuration="500"
         app:shapeType="CIRCLE"
         app:thumbBgColor="@android:color/white"
         app:thumbPadding="10dp"
         app:thumbSrc="@drawable/ic_arrow"
         app:thumbSrcTint="#35B303"
         app:thumbWidth="60dp"
-        app:trackBgColor="#80000000"
+        app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
         app:unlockLockText="滑动解锁"
-        app:unlockLockTextColor="@color/white"
-        app:unlockLockTextSize="12sp" />
+        app:unlockLockTextColor="@color/black"
+        app:unlockLockTextSize="16sp" />
 
 
     <com.slide.unlock.SlideUnlockView
@@ -34,69 +34,68 @@
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:padding="2dp"
-        app:duration="500"
-        app:iOSEffect="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:resilienceDuration="500"
         app:shapeType="SQUARE"
         app:thumbBgColor="@android:color/white"
         app:thumbPadding="10dp"
         app:thumbSrc="@drawable/ic_arrow"
         app:thumbSrcTint="#35B303"
         app:thumbWidth="60dp"
-        app:trackBgColor="#80000000"
+        app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
         app:unlockLockText="滑动解锁"
-        app:unlockLockTextColor="@color/white"
-        app:unlockLockTextSize="12sp" />
+        app:unlockLockTextColor="@color/black"
+        app:unlockLockTextSize="16sp" />
 
-    <com.slide.unlock.SlideUnlockView
+    <com.slide.unlock.view.FlexibleSlideUnlockView
         android:id="@+id/slide_ios_circle"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:padding="2dp"
-        app:duration="500"
-        app:iOSEffect="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/slide_square"
+        app:resilienceDuration="500"
         app:shapeType="CIRCLE"
+        app:shineEffect="true"
         app:thumbBgColor="@android:color/white"
         app:thumbPadding="10dp"
         app:thumbSrc="@drawable/ic_phone"
         app:thumbSrcTint="#35B303"
         app:thumbWidth="60dp"
-        app:trackBgColor="#80000000"
+        app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
         app:unlockLockText="滑动接听"
-        app:unlockLockTextColor="@color/white"
-        app:unlockLockTextSize="12sp" />
+        app:unlockLockTextColor="@color/black"
+        app:unlockLockTextSize="16sp" />
 
-    <com.slide.unlock.SlideUnlockView
+    <com.slide.unlock.view.FlexibleSlideUnlockView
         android:id="@+id/slide_ios_square"
         android:layout_width="250dp"
         android:layout_height="50dp"
         android:layout_marginTop="20dp"
         android:padding="2dp"
-        app:duration="500"
-        app:iOSEffect="true"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@id/slide_ios_circle"
+        app:resilienceDuration="500"
         app:shapeType="SQUARE"
+        app:shineEffect="true"
         app:thumbBgColor="@android:color/white"
         app:thumbPadding="10dp"
         app:thumbSrc="@drawable/ic_phone"
         app:thumbSrcTint="#35B303"
         app:thumbWidth="60dp"
-        app:trackBgColor="#80000000"
+        app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
         app:unlockLockText="滑动接听"
-        app:unlockLockTextColor="@color/white"
-        app:unlockLockTextSize="12sp" />
+        app:unlockLockTextColor="@color/black"
+        app:unlockLockTextSize="16sp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

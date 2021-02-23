@@ -7,12 +7,12 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.animation.LinearInterpolator
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
-import androidx.core.graphics.toRect
 import kotlin.math.abs
 
 
@@ -20,7 +20,7 @@ import kotlin.math.abs
  * <pre>
  *   @author : leo
  *   @time   : 2021/02/21
- *   @desc   : Slide to unlock
+ *   @desc   : 滑动解锁效果
  * </pre>
  */
 open class SlideUnlockView : View {
@@ -65,8 +65,32 @@ open class SlideUnlockView : View {
     protected open var unlockLockTextSize: Int = 12
 
     @ColorInt
+    protected open var unlockLockTextShineColor: Int = Color.WHITE
+
+    @ColorInt
     protected open var unlockLockTextColor: Int = Color.WHITE
+    protected open var textWidth: Float = 0f
+    protected open var drawTextX: Float = 0f
+    protected open var textHeight: Float = 0f
+    protected open var drawTextY: Float = 0f
     protected open val textPaint = TextPaint()
+    protected open var shineDuration: Int = 3000
+    protected open val shineAnimator: ValueAnimator by lazy {
+        createShineAnimator()
+    }
+    protected open val gradientMatrix: Matrix by lazy { Matrix() }
+    protected open var gradientTranslate: Float = 0f
+    protected open val gradient: LinearGradient by lazy {
+        LinearGradient(
+            -width.toFloat(),
+            0f,
+            0f,
+            0f,
+            intArrayOf(unlockLockTextColor, unlockLockTextShineColor, unlockLockTextColor),
+            floatArrayOf(0f, 0.5f, 1f),
+            Shader.TileMode.CLAMP
+        )
+    }
 
     /**
      * 滑动解锁滑块参数
@@ -80,12 +104,12 @@ open class SlideUnlockView : View {
      * @see thumbLeftBorder  滑块绘制最左侧边界
      * @see thumbRightBorder 滑块绘制最右侧边界
      * @see thumbLeftX 滑块左侧其实X轴位置
-     * @see duration 滑动解锁失败，滑块回弹动画时长
+     * @see resilienceDuration 滑动解锁失败，滑块回弹动画时长
      * @see slidingDistance 滑块移动间距
      * @see slidingStarX 滑块按下时的起始X轴
      * @see thumbDrawSrc 最终绘制的按钮icon图片
      * @see thumbPadding 滑块内边距
-     * @see iOSEffect 是否开启iOS风格效果
+     * @see shineEffect 是否开启iOS风格效果
      */
     protected open val thumbSrcPaint: Paint = Paint()
     protected open val thumbPaint: Paint = Paint()
@@ -107,39 +131,64 @@ open class SlideUnlockView : View {
     @ColorInt
     protected open var thumbSrcTint: Int = -1
     protected open var thumbShape: ThumbShape = ThumbShape.SQUARE
-    protected open var duration: Int = 500
+    protected open var resilienceDuration: Int = 500
     protected open var slidingDistance: Float = 0f
     protected open var slidingStarX: Float = 0f
-    protected open var iOSEffect: Boolean = false
-    protected open val animator: ValueAnimator by lazy {
-        createThumbAnimator()
+    protected open var shineEffect: Boolean = false
+    protected open val springAnimator: ValueAnimator by lazy {
+        createSpringAnimator()
     }
 
+
     /**
-     * 解锁失败，滑块回弹动画
+     * 字体闪光动效
      * @return ValueAnimator
      */
-    protected open fun createThumbAnimator(): ValueAnimator = let {
-        ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = this@SlideUnlockView.duration.toLong()
+    protected open fun createShineAnimator(): ValueAnimator = let {
+        ValueAnimator.ofFloat(-width.toFloat(), width.toFloat() * 2).apply {
+            duration = this@SlideUnlockView.shineDuration.toLong()
+            repeatCount = ValueAnimator.INFINITE
+            interpolator = LinearInterpolator()
             addUpdateListener {
-                thumbResilience(it.animatedValue as Float)
+                setTextShineEffect(it.animatedValue as Float)
+                postInvalidate()
             }
         }
     }
 
 
     /**
-     * 滑块回弹效果
+     * 设置文字闪光动画
      * @param value Float
      */
-    protected open fun thumbResilience(value: Float) {
+    private fun setTextShineEffect(value: Float) {
+        gradientTranslate = value
+        gradientMatrix.mapRect(RectF(0f, textWidth / 3, 0f, textHeight))
+        gradientMatrix.setTranslate(gradientTranslate, 0f)
+        gradient.setLocalMatrix(gradientMatrix)
+    }
+
+    /**
+     * 设置滑块回弹动画
+     * @return ValueAnimator
+     */
+    protected open fun createSpringAnimator(): ValueAnimator = let {
+        ValueAnimator.ofFloat(1f, 0f).apply {
+            duration = this@SlideUnlockView.resilienceDuration.toLong()
+            addUpdateListener {
+                setSpringEffect(it.animatedValue as Float)
+                postInvalidate()
+            }
+        }
+    }
+
+    /**
+     * 回弹效果更新
+     * @param value Float
+     */
+    protected open fun setSpringEffect(value: Float) {
         thumbLeftX = thumbLeftBorder + slidingDistance * value
         resetThumbPath()
-        if (iOSEffect) {
-            resetTrackPath()
-        }
-        postInvalidate()
     }
 
 
@@ -156,13 +205,15 @@ open class SlideUnlockView : View {
         val drawable = array.getDrawable(R.styleable.SlideUnlockView_thumbSrc)
         thumbWidth = array.getDimension(R.styleable.SlideUnlockView_thumbWidth, 60f)
         thumbPadding = array.getDimensionPixelOffset(R.styleable.SlideUnlockView_thumbPadding, 0)
-        duration = array.getInt(R.styleable.SlideUnlockView_duration, 500)
-        iOSEffect = array.getBoolean(R.styleable.SlideUnlockView_iOSEffect, false)
+        resilienceDuration = array.getInt(R.styleable.SlideUnlockView_resilienceDuration, 500)
+        shineEffect = array.getBoolean(R.styleable.SlideUnlockView_shineEffect, false)
         unlockLockText = array.getString(R.styleable.SlideUnlockView_unlockLockText)
         unlockLockTextColor =
             array.getColor(R.styleable.SlideUnlockView_unlockLockTextColor, Color.WHITE)
         unlockLockTextSize =
             array.getDimensionPixelSize(R.styleable.SlideUnlockView_unlockLockTextSize, 12)
+        unlockLockTextShineColor =
+            array.getColor(R.styleable.SlideUnlockView_unlockLockTextShineColor, Color.WHITE)
         thumbShape = array.getInt(R.styleable.SlideUnlockView_shapeType, 0).let {
             ThumbShape.parse(it)
         }
@@ -174,7 +225,6 @@ open class SlideUnlockView : View {
         }
         DrawableCompat.setTint(drawable, Color.RED)
         thumbSrc = drawable.toBitmap(config = Bitmap.Config.ARGB_8888)
-
         array.recycle()
     }
 
@@ -292,7 +342,7 @@ open class SlideUnlockView : View {
      */
     protected open fun resetTrackPath() {
         trackPath.reset()
-        if (iOSEffect) {
+        if (shineEffect) {
             trackRectF.left = thumbLeftX - paddingLeft
         } else {
             trackRectF.left = 0f
@@ -305,7 +355,7 @@ open class SlideUnlockView : View {
     }
 
     /**
-     * 解锁控件滑块绘制路径配置
+     * 滑块绘制路径
      */
     protected open fun resetThumbPath() {
         thumbPath.reset()
@@ -320,9 +370,10 @@ open class SlideUnlockView : View {
     }
 
     /**
-     * 方形滑块绘制路径配置
+     * 方形滑块绘制路径
      */
     protected open fun resetSquareThumbPath() {
+        //确定滑块绘制坐标和范围
         thumbRoundCorner = height.toFloat()
         thumbRectF.right = thumbRectF.left + thumbWidth
         thumbPath.addRoundRect(
@@ -382,10 +433,10 @@ open class SlideUnlockView : View {
 
 
     /**
-     * 圆形滑块，绘制路径配置
+     * 圆形滑块绘制路径
      */
     protected open fun resetCircleThumbPath() {
-        //确定滑块位置和大小
+        //确定滑块绘制坐标和范围
         thumbWidth = thumbRectF.height()
         val radius = thumbWidth / 2
         val cx = thumbRectF.left + radius
@@ -408,13 +459,21 @@ open class SlideUnlockView : View {
 
 
     /**
-     * 绘制图形
+     * 绘制背景
      * @param canvas Canvas
      */
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.drawPath(trackPath, trackPaint)
         onDrawText(canvas)
+    }
+
+    /**
+     * 绘制滑块
+     * @param canvas Canvas
+     */
+    override fun onDrawForeground(canvas: Canvas?) {
+        super.onDrawForeground(canvas)
         canvas?.drawPath(thumbPath, thumbPaint)
         canvas?.drawBitmap(
             thumbDrawSrc!!,
@@ -429,11 +488,15 @@ open class SlideUnlockView : View {
      * @param canvas Canvas?
      */
     protected open fun onDrawText(canvas: Canvas?) {
-        val textWidth = textPaint.measureText(unlockLockText)
-        val drawX = (width - textWidth) * 0.5f
-        val textHeight = (abs(textPaint.ascent()) - textPaint.descent()) / 2
-        val drawY = height * 0.5f + textHeight / 2
-        canvas?.drawText(unlockLockText.orEmpty(), drawX, drawY, textPaint)
+        textWidth = textPaint.measureText(unlockLockText)
+        drawTextX = (width - textWidth) * 0.5f
+        textHeight = (abs(textPaint.ascent()) - textPaint.descent())
+        drawTextY = (height * 0.5f + textHeight / 2)
+        if (shineEffect && !shineAnimator.isRunning) {
+            textPaint.shader = gradient
+            shineAnimator.start()
+        }
+        canvas?.drawText(unlockLockText.orEmpty(), drawTextX, drawTextY, textPaint)
     }
 
 
@@ -448,27 +511,35 @@ open class SlideUnlockView : View {
                 slidingStarX = event.x
             }
             MotionEvent.ACTION_MOVE -> {
-                moveThumb(event)
+                setThumbScrollEffect(event)
+                postInvalidate()
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (thumbRectF.right >= thumbRightBorder) {
-                    unlockCallback?.onSlideUnlock(true)
-                } else {
-                    slidingDistance = thumbRectF.left - thumbLeftBorder
-                    unlockCallback?.onSlideUnlock(false)
-                    animator.start()
-                }
+                setSlideUnlockResult()
             }
         }
         return true
     }
 
+    /**
+     * 设置滑动解锁结果
+     */
+    protected open fun setSlideUnlockResult() {
+        if (thumbRectF.right >= thumbRightBorder) {
+            unlockCallback?.onSlideUnlock(true)
+        } else {
+            slidingDistance = thumbRectF.left - thumbLeftBorder
+            unlockCallback?.onSlideUnlock(false)
+            springAnimator.start()
+        }
+    }
+
 
     /**
-     * 根据手指滑动距离，移动滑块位置
+     * 设置滑块移动位置效果
      * @param event MotionEvent
      */
-    protected open fun moveThumb(event: MotionEvent) {
+    protected open fun setThumbScrollEffect(event: MotionEvent) {
         slidingDistance = event.x - slidingStarX
         thumbLeftX += slidingDistance
         if (thumbLeftX > thumbRightBorder - thumbWidth) {
@@ -479,20 +550,6 @@ open class SlideUnlockView : View {
         }
         slidingStarX = event.x
         resetThumbPath()
-        if (iOSEffect) {
-            resetTrackPath()
-        }
-        postInvalidate()
-    }
-
-
-    /**
-     * 重置View为初始状态值
-     */
-    open fun reset() {
-        thumbLeftX = thumbLeftBorder
-        resetThumbPath()
-        postInvalidate()
     }
 
 
