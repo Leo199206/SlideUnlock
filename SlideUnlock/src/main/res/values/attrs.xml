@@ -10,6 +10,9 @@
         <attr name="thumbWidth" format="dimension" />
         <attr name="duration" format="integer" />
         <attr name="unlockLockText" format="string" />
+        <attr name="unlockLockTextSize" format="dimension" />
+        <attr name="unlockLockTextColor" format="color" />
+        <attr name="iOSEffect" format="boolean" />
         <attr name="shapeType">
             <enum name="CIRCLE" value="0" />
             <enum name="SQUARE" value="1" />
