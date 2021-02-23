@@ -1,5 +1,7 @@
 package com.slide.unlock.view
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
@@ -182,6 +184,13 @@ open class SlideUnlockView : View {
                 setSpringEffect(it.animatedValue as Float)
                 postInvalidate()
             }
+
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    super.onAnimationEnd(animation)
+                    unlockCallback?.onSlideUnlock(false)
+                }
+            })
         }
     }
 
@@ -524,15 +533,6 @@ open class SlideUnlockView : View {
         return true
     }
 
-
-    /**
-     * 解锁状态回调
-     * @param callback OnSlideUnlockCallback
-     */
-    fun setSlideUnlockCallback(callback: OnSlideUnlockCallback) {
-        this.unlockCallback = callback
-    }
-
     /**
      * 设置滑动解锁结果
      */
@@ -541,9 +541,16 @@ open class SlideUnlockView : View {
             unlockCallback?.onSlideUnlock(true)
         } else {
             slidingDistance = thumbRectF.left - thumbLeftBorder
-            unlockCallback?.onSlideUnlock(false)
             springAnimator.start()
         }
+    }
+
+    /**
+     * 解锁状态回调
+     * @param callback OnSlideUnlockCallback
+     */
+    fun setSlideUnlockCallback(callback: OnSlideUnlockCallback) {
+        this.unlockCallback = callback
     }
 
 
