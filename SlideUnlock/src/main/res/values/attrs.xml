@@ -8,6 +8,10 @@
         <attr name="thumbSrcTint" format="color" />
         <attr name="thumbSrc" format="reference" />
         <attr name="thumbWidth" format="dimension" />
+        <attr name="thumbShape">
+            <enum name="CIRCLE" value="0" />
+            <enum name="SQUARE" value="1" />
+        </attr>
         <attr name="resilienceDuration" format="integer" />
         <attr name="unlockLockText" format="string" />
         <attr name="unlockLockTextSize" format="dimension" />
@@ -15,9 +19,5 @@
         <attr name="unlockLockTextShineColor" format="color" />
         <attr name="shineDuration" format="integer" />
         <attr name="shineEffect" format="boolean" />
-        <attr name="shapeType">
-            <enum name="CIRCLE" value="0" />
-            <enum name="SQUARE" value="1" />
-        </attr>
     </declare-styleable>
 </resources>

@@ -226,7 +226,7 @@ open class SlideUnlockView : View {
             array.getDimensionPixelSize(R.styleable.SlideUnlockView_unlockLockTextSize, 12)
         unlockLockTextShineColor =
             array.getColor(R.styleable.SlideUnlockView_unlockLockTextShineColor, Color.WHITE)
-        thumbShape = array.getInt(R.styleable.SlideUnlockView_shapeType, 0).let {
+        thumbShape = array.getInt(R.styleable.SlideUnlockView_thumbShape, 0).let {
             ThumbShape.parse(it)
         }
         check(drawable != null) {
