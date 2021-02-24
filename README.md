@@ -115,10 +115,10 @@ implementation  'com.github.Leo199206:SlideUnlock:1.0.0'
 | shineEffect | 是否开启解锁提示文字流光效果 |
 
 
+#### 支持
++ 使用过程中，如有问题或者建议，欢迎提出issue
++ 如遇issue解决不了的问题，可以邮件联系：850884963@qq.com
++ 开源维护不易，如果该库对你有帮助，请动动你的小手指，给个star🤩  
+
 #### LICENSE
 SlideUnlock is under the Apache License Version 2.0. See the [LICENSE](https://raw.githubusercontent.com/Leo199206/SlideUnlock/main/LICENSE) file for details.
-
-#### 支持
-+ 使用过程中，如有问题或者建议，欢迎提出issue。
-+ 如遇issue解决不了的问题，可以邮件联系：850884963@qq.com。
-+ 开源维护不易，如果该库对你有帮助，请动动你的小手指，给个star。🤩  
