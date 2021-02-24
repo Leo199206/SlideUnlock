@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".MainActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="常用效果"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
 
     <com.slide.unlock.view.SlideUnlockView
         android:id="@+id/slide_circle"
@@ -51,11 +62,19 @@
         app:unlockLockTextColor="@color/black"
         app:unlockLockTextSize="16sp" />
 
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="30dp"
+        android:text="iOS来电滑动接听效果"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
     <com.slide.unlock.view.FlexibleSlideUnlockView
         android:id="@+id/slide_ios_circle"
         android:layout_width="250dp"
         android:layout_height="50dp"
-        android:layout_marginTop="20dp"
         android:padding="2dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -70,7 +89,7 @@
         app:thumbWidth="60dp"
         app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
-        app:unlockLockText="滑动接听"
+        app:unlockLockText="滑动以接听"
         app:unlockLockTextColor="@color/black"
         app:unlockLockTextSize="16sp" />
 
@@ -93,9 +112,9 @@
         app:thumbWidth="60dp"
         app:trackBgColor="#64000000"
         app:trackRoundCorner="50dp"
-        app:unlockLockText="滑动接听"
+        app:unlockLockText="滑动以接听"
         app:unlockLockTextColor="@color/black"
         app:unlockLockTextSize="16sp" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
