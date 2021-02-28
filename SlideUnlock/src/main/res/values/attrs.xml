@@ -5,9 +5,18 @@
         <attr name="trackRoundCorner" format="dimension" />
         <attr name="thumbBgColor" format="color" />
         <attr name="thumbPadding" format="dimension" />
-        <attr name="thumbSrcTint" format="color" />
-        <attr name="thumbSrc" format="reference" />
+        <attr name="thumbTint" format="color" />
+        <attr name="thumbDrawable" format="reference" />
         <attr name="thumbWidth" format="dimension" />
+        <attr name="thumbText" format="string" />
+        <attr name="thumbTextStyle" format="enum">
+            <enum name="DEFAULT" value="0" />
+            <enum name="BOLD" value="1" />
+        </attr>
+        <attr name="thumbType" format="enum">
+            <enum name="TEXT" value="0" />
+            <enum name="DRAWABLE" value="1" />
+        </attr>
         <attr name="thumbShape">
             <enum name="CIRCLE" value="0" />
             <enum name="SQUARE" value="1" />
@@ -17,6 +26,10 @@
         <attr name="unlockLockTextSize" format="dimension" />
         <attr name="unlockLockTextColor" format="color" />
         <attr name="unlockLockTextShineColor" format="color" />
+        <attr name="unlockLockTextStyle" format="enum">
+            <enum name="DEFAULT" value="0" />
+            <enum name="BOLD" value="1" />
+        </attr>
         <attr name="shineDuration" format="integer" />
         <attr name="shineEffect" format="boolean" />
     </declare-styleable>
