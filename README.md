@@ -15,7 +15,7 @@
 
 
 #### 效果预览
-<img src="https://raw.githubusercontent.com/Leo199206/SlideUnlock/main/image/device-2021-02-24-115028.gif" width="300" heght="500" align=center />
+<img src="https://raw.githubusercontent.com/Leo199206/SlideUnlock/main/image/device-2021-02-28-151723.gif" width="300" heght="500" align=center />
 
 
 #### 依赖
@@ -32,13 +32,13 @@ allprojects {
 + 添加以下maven依赖配置到app模块，gradle文件下
 
 ```
-implementation  'com.github.Leo199206:SlideUnlock:1.0.0'
+implementation  'com.github.Leo199206:SlideUnlock:1.0.1'
 ```
 
 #### 添加到布局
 
 ```
-      <com.slide.unlock.view.SlideUnlockView
+    <com.slide.unlock.view.SlideUnlockView
           android:id="@+id/slide_circle"
           android:layout_width="250dp"
           android:layout_height="50dp"
@@ -102,16 +102,21 @@ implementation  'com.github.Leo199206:SlideUnlock:1.0.0'
 | --- | --- |
 | trackBgColor | 背景颜色 |
 | trackRoundCorner | 背景圆角大小 |
-| thumbShape | 滑块形状，CIRCLE为圆形，SQUARE为方形 |
 | thumbBgColor | 滑块背景颜色 |
-| thumbSrcTint | 滑块图标颜色 | 
-| thumbSrc | 滑块图标图片 | 
+| thumbPadding | 滑块内边距 |
+| thumbTint | 滑块内容着色颜色 | 
+| thumbDrawable | 滑块内容图片，仅在thumbType为DRAWABLE时有效 | 
 | thumbWidth | 滑块宽度，仅方形滑块有效，圆形滑块宽高默认为去除内边距的控件高度 |
+| thumbText | 仅在thumbType为TEXT时有效 | 
+| thumbTextStyle | 滑块文字风格，DEFAULT为默认风格，BOLD为粗体 | 
+| thumbType | 滑块内容类型，TEXT为文字，DRAWABLE为图片 | 
+| thumbShape | 滑块形状，CIRCLE为圆形，SQUARE为方形 |
 | resilienceDuration | 取消解锁，滑块回弹动画时长 |
 | unlockLockText | 解锁提示 |
 | unlockLockTextSize | 解锁提示文字大小 |
 | unlockLockTextColor | 解锁提示文字颜色 |
 | unlockLockTextShineColor | 解锁提示文字，流光效果颜色，仅在shineEffect为true时生效 |
+| unlockLockTextStyle | 解锁提示文字风格，DEFAULT为默认风格，BOLD为粗体 | 
 | shineDuration | 解锁提示文字流光效果，动画时长 |
 | shineEffect | 是否开启解锁提示文字流光效果 |
 

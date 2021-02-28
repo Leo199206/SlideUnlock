@@ -21,6 +21,8 @@ class MainActivity : AppCompatActivity(), OnSlideUnlockCallback {
         slide_square.setSlideUnlockCallback(this)
         slide_ios_circle.setSlideUnlockCallback(this)
         slide_ios_square.setSlideUnlockCallback(this)
+        slide_ios_close.setSlideUnlockCallback(this)
+        slide_close.setSlideUnlockCallback(this)
     }
 
     override fun onSlideUnlock(success: Boolean) {
