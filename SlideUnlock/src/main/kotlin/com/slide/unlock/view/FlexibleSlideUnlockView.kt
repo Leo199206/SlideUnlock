@@ -26,11 +26,12 @@ class FlexibleSlideUnlockView : SlideUnlockView {
      */
     override fun setThumbScrollEffect(event: MotionEvent) {
         super.setThumbScrollEffect(event)
+        //滑块移动时，背景长度跟随变化
         resetTrackPath()
         if (thumbLeftX > thumbLeftBorder) {
-            textPaint.alpha = 0
+            unlockLockTextPaint.alpha = 0
         } else {
-            textPaint.alpha = 255
+            unlockLockTextPaint.alpha = 255
         }
     }
 
@@ -40,9 +41,10 @@ class FlexibleSlideUnlockView : SlideUnlockView {
      */
     override fun setSpringEffect(value: Float) {
         super.setSpringEffect(value)
+        //滑块松手回弹时，背景长度跟随变化
         resetTrackPath()
         if (value == 0f) {
-            textPaint.alpha = 255
+            unlockLockTextPaint.alpha = 255
         }
     }
 }
