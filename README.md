@@ -60,7 +60,7 @@ implementation  'com.github.Leo199206:SlideUnlock:1.0.1'
           app:unlockLockTextColor="@color/black"
           app:unlockLockTextSize="16sp" />
 
-   <com.slide.unlock.view.FlexibleSlideUnlockView
+   <com.slide.unlock.view.FlexibleTrackSlideUnlockView
         android:id="@+id/slide_ios_circle"
         android:layout_width="250dp"
         android:layout_height="50dp"

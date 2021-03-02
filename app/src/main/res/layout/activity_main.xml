@@ -86,7 +86,7 @@
         android:textColor="@color/black"
         android:textSize="16sp" />
 
-    <com.slide.unlock.view.FlexibleSlideUnlockView
+    <com.slide.unlock.view.FlexibleTrackSlideUnlockView
         android:id="@+id/slide_ios_circle"
         android:layout_width="250dp"
         android:layout_height="50dp"
@@ -108,7 +108,7 @@
         app:unlockLockTextColor="@color/black"
         app:unlockLockTextSize="16sp" />
 
-    <com.slide.unlock.view.FlexibleSlideUnlockView
+    <com.slide.unlock.view.FlexibleTrackSlideUnlockView
         android:id="@+id/slide_ios_square"
         android:layout_width="250dp"
         android:layout_height="50dp"
@@ -132,7 +132,7 @@
         app:unlockLockTextSize="16sp" />
 
 
-    <com.slide.unlock.view.FlexibleSlideUnlockView
+    <com.slide.unlock.view.FlexibleTrackSlideUnlockView
         android:id="@+id/slide_ios_close"
         android:layout_width="250dp"
         android:layout_height="50dp"

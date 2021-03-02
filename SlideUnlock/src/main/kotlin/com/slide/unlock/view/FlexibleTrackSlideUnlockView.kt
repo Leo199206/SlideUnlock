@@ -11,7 +11,7 @@ import android.view.MotionEvent
  *   @desc   : iOS 滑动解锁效果
  * </pre>
  */
-class FlexibleSlideUnlockView : SlideUnlockView {
+class FlexibleTrackSlideUnlockView : SlideUnlockView {
     constructor(context: Context?) : super(context)
     constructor(context: Context?, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
