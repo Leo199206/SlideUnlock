@@ -613,8 +613,8 @@ open class SlideUnlockView : View {
         thumbBackgroundRectF.right = thumbRightX
         thumbBackgroundPath.addRoundRect(
             thumbBackgroundRectF,
-            trackRoundCorner,
-            trackRoundCorner,
+            thumbBackgroundRoundCorner,
+            thumbBackgroundRoundCorner,
             Path.Direction.CW
         )
     }

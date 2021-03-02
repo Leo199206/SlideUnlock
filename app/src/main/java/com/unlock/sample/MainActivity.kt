@@ -26,11 +26,8 @@ class MainActivity : AppCompatActivity(), OnSlideUnlockCallback {
     }
 
     override fun onSlideUnlock(success: Boolean) {
-        val text = if (success) {
-            "解锁成功"
-        } else {
-            "解锁取消"
+        if (success) {
+            Toast.makeText(this, "解锁成功", Toast.LENGTH_SHORT).show()
         }
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show()
     }
 }
