@@ -27,7 +27,9 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      * @param event MotionEvent
      */
     override fun setThumbMoveEffect(event: MotionEvent) {
-        slidingDistance = event.x - slidingStarX
+        var x = correctThumbX(event)
+        slidingDistance = x - slidingStarX
+        slidingStarX = x
         thumbRightX += slidingDistance
         if (thumbRightX > thumbRightBorder) {
             thumbRightX = thumbRightBorder
@@ -35,28 +37,17 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
         if (thumbRightX < thumbLeftX + thumbBackgroundWidth) {
             thumbRightX = thumbLeftX + thumbBackgroundWidth
         }
-        slidingStarX = event.x
     }
+
 
     /**
      * 回弹效果更新
      * @param value Float
      */
     override fun setSpringEffect(value: Float) {
-        thumbRightX = thumbLeftX + thumbBackgroundWidth + (slidingDistance * value)
+        thumbRightX = thumbLeftX + thumbBackgroundWidth + slidingDistance * value
     }
 
-    /**
-     * 设置滑动解锁结果
-     */
-    override fun setSlideUnlockResult() {
-        if (thumbBackgroundRectF.right >= thumbRightBorder) {
-            unlockCallback?.onSlideUnlockComplete(this)
-        } else {
-            slidingDistance = thumbBackgroundRectF.right - thumbLeftX - thumbBackgroundWidth
-            springAnimator.start()
-        }
-    }
 
     /**
      * 圆形滑块背景绘制路径
