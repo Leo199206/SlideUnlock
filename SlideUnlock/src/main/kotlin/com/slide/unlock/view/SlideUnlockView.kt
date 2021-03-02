@@ -4,11 +4,14 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.*
+import android.graphics.drawable.Drawable
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.animation.LinearInterpolator
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
@@ -38,11 +41,20 @@ open class SlideUnlockView : View {
         initPaint()
     }
 
+    private var distanceY: Int = 0
+    private var distanceX: Int = 0
+    private var firstY: Int = 0
+    private var firstX: Int = 0
+    private val touchSlop: Int by lazy {
+        ViewConfiguration.get(context).scaledTouchSlop
+    }
+
     /**
      * 解锁控件背景参数
      * @see unlockCallback 解锁结果回调
      * @see trackPaint 背景画笔
      * @see trackRoundCorner 背景圆角大小
+     * @see trackPadding 背景内边距
      * @see trackBgColor 背景颜色
      * @see trackRectF 背景绘制区域
      * @see trackPath 背景绘制路径
@@ -52,6 +64,9 @@ open class SlideUnlockView : View {
 
     @Px
     protected open var trackRoundCorner: Float = 0f
+
+    @Px
+    protected open var trackPadding: Int = 0
 
     @ColorInt
     protected open var trackBgColor: Int = Color.WHITE
@@ -117,7 +132,10 @@ open class SlideUnlockView : View {
      * @see thumbBackgroundWidth 滑块宽度
      * @see thumbLeftBorder  滑块绘制最左侧边界
      * @see thumbRightBorder 滑块绘制最右侧边界
-     * @see thumbLeftX 滑块左侧其实X轴位置
+     * @see thumbLeftX 滑块左侧起始X轴位置
+     * @see thumbRightX 滑块右侧结束X轴位置
+     * @see thumbStartLeftX 滑块默认左侧起始X轴位置
+     * @see thumbStartRightX 滑块默认右侧起始X轴位置
      * @see resilienceDuration 滑动解锁失败，滑块回弹动画时长
      * @see slidingDistance 滑块移动间距
      * @see slidingStarX 滑块按下时的起始X轴
@@ -126,6 +144,7 @@ open class SlideUnlockView : View {
      * @see shineEffect 是否开启iOS风格效果
      * @see thumbContentTextWidth 滑块文字宽度
      * @see thumbContentTextDrawY 滑块文字绘制Y轴位置
+     * @see thumbContentTextDrawX 滑块文字绘制X轴位置
      * @see thumbContentText 滑块文字
      * @see thumbContentTextHeight 滑块文字高度
      * @see thumbContentTexStyle 滑块文字风格
@@ -139,6 +158,7 @@ open class SlideUnlockView : View {
     protected open var thumbContentTextSize: Float = 10f
     protected open var thumbContentTextWidth: Float = 0f
     protected open var thumbContentTextDrawY: Float = 0f
+    protected open var thumbContentTextDrawX: Float = 0f
     protected open var thumbContentTextHeight: Float = 0f
     protected open var thumbContentTexStyle: TextStyle = TextStyle.DEFAULT
 
@@ -148,7 +168,10 @@ open class SlideUnlockView : View {
     protected open var thumbBackgroundWidth: Float = 100f
     protected open var thumbLeftBorder: Float = 0f
     protected open var thumbRightBorder: Float = 0f
+    protected open var thumbStartLeftX: Float = 0f
+    protected open var thumbStartRightX: Float = 0f
     protected open var thumbLeftX: Float = 0f
+    protected open var thumbRightX: Float = 0f
     protected open var thumbDrawable: Bitmap? = null
     protected open var thumbDrawDrawable: Bitmap? = null
     protected open val thumbDrawDrawableRectF: RectF by lazy { RectF() }
@@ -162,6 +185,7 @@ open class SlideUnlockView : View {
     protected open var resilienceDuration: Int = 500
     protected open var slidingDistance: Float = 0f
     protected open var slidingStarX: Float = 0f
+    protected open var slidingStarY: Float = 0f
     protected open var shineEffect: Boolean = false
     protected open val springAnimator: ValueAnimator by lazy {
         createSpringAnimator()
@@ -205,13 +229,14 @@ open class SlideUnlockView : View {
             duration = this@SlideUnlockView.resilienceDuration.toLong()
             addUpdateListener {
                 setSpringEffect(it.animatedValue as Float)
+                setSlideUnlockProgress()
+                resetThumbPath()
                 postInvalidate()
             }
-
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
-                    unlockCallback?.onSlideUnlock(false)
+                    slidingDistance = 0f
                 }
             })
         }
@@ -223,7 +248,7 @@ open class SlideUnlockView : View {
      */
     protected open fun setSpringEffect(value: Float) {
         thumbLeftX = thumbLeftBorder + slidingDistance * value
-        resetThumbPath()
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
     }
 
 
@@ -233,27 +258,11 @@ open class SlideUnlockView : View {
      */
     private fun initAttributes(attrs: AttributeSet?) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.SlideUnlockView)
-        trackBgColor = array.getColor(R.styleable.SlideUnlockView_trackBgColor, Color.WHITE)
-        trackRoundCorner = array.getDimension(R.styleable.SlideUnlockView_trackRoundCorner, 0f)
-        thumbBackgroundColor = array.getColor(R.styleable.SlideUnlockView_thumbBgColor, Color.RED)
-        thumbTint = array.getColor(R.styleable.SlideUnlockView_thumbTint, -1)
-        val drawable = array.getDrawable(R.styleable.SlideUnlockView_thumbDrawable)
-        thumbBackgroundWidth = array.getDimension(R.styleable.SlideUnlockView_thumbWidth, 60f)
-        thumbPadding = array.getDimensionPixelOffset(R.styleable.SlideUnlockView_thumbPadding, 0)
-        thumbShape =
-            array.getInt(R.styleable.SlideUnlockView_thumbShape, ThumbShape.CIRCLE.value).let {
-                ThumbShape.parse(it)
-            }
-        thumbType =
-            array.getInt(R.styleable.SlideUnlockView_thumbType, ThumbType.DRAWABLE.value).let {
-                ThumbType.parse(it)
-            }
-        thumbContentText = array.getString(R.styleable.SlideUnlockView_thumbText).orEmpty()
-        thumbContentTexStyle =
-            array.getInt(R.styleable.SlideUnlockView_thumbTextStyle, TextStyle.DEFAULT.value.style)
-                .let {
-                    TextStyle.parse(it)
-                }
+        val count = array.indexCount
+        var drawable: Drawable? = null
+        for (index in 0 until count) {
+            drawable = setAttributesValue(array.getIndex(index), array, drawable)
+        }
         if (thumbType == ThumbType.DRAWABLE) {
             check(drawable != null) {
                 "The thumbSrc property must be set!!"
@@ -264,26 +273,112 @@ open class SlideUnlockView : View {
             DrawableCompat.setTint(drawable, Color.RED)
             thumbDrawable = drawable.toBitmap(config = Bitmap.Config.ARGB_8888)
         }
-
-
-        resilienceDuration = array.getInt(R.styleable.SlideUnlockView_resilienceDuration, 500)
-        shineEffect = array.getBoolean(R.styleable.SlideUnlockView_shineEffect, false)
-        unlockLockText = array.getString(R.styleable.SlideUnlockView_unlockLockText)
-        unlockLockTextColor =
-            array.getColor(R.styleable.SlideUnlockView_unlockLockTextColor, Color.WHITE)
-        unlockTextSize =
-            array.getDimensionPixelSize(R.styleable.SlideUnlockView_unlockLockTextSize, 12)
-        unlockLockTextShineColor =
-            array.getColor(R.styleable.SlideUnlockView_unlockLockTextShineColor, Color.WHITE)
-        unlockLockTextStyle =
-            array.getInt(
-                R.styleable.SlideUnlockView_unlockLockTextStyle,
-                TextStyle.DEFAULT.value.style
-            )
-                .let {
-                    TextStyle.parse(it)
-                }
         array.recycle()
+
+    }
+
+
+    /**
+     * 设置自定义属性参数值
+     * @param indexValue Int
+     * @param array TypedArray
+     * @param drawable Drawable?
+     * @return Drawable?
+     */
+    private fun setAttributesValue(
+        indexValue: Int,
+        array: TypedArray,
+        drawable: Drawable?
+    ): Drawable? {
+        var drawable1 = drawable
+        when (indexValue) {
+            R.styleable.SlideUnlockView_trackBgColor -> {
+                trackBgColor =
+                    array.getColor(indexValue, Color.WHITE)
+            }
+            R.styleable.SlideUnlockView_trackRoundCorner -> {
+                trackRoundCorner =
+                    array.getDimension(indexValue, 0f)
+            }
+            R.styleable.SlideUnlockView_thumbBgColor -> {
+                thumbBackgroundColor =
+                    array.getColor(indexValue, Color.RED)
+            }
+            R.styleable.SlideUnlockView_thumbPadding -> {
+                thumbPadding =
+                    array.getDimensionPixelOffset(indexValue, 0)
+            }
+            R.styleable.SlideUnlockView_thumbTint -> {
+                thumbTint = array.getColor(indexValue, -1)
+            }
+            R.styleable.SlideUnlockView_thumbDrawable -> {
+                drawable1 = array.getDrawable(indexValue)
+            }
+            R.styleable.SlideUnlockView_thumbWidth -> {
+                thumbBackgroundWidth = array.getDimension(indexValue, 60f)
+            }
+            R.styleable.SlideUnlockView_thumbText -> {
+                thumbContentText = array.getString(indexValue).orEmpty()
+            }
+            R.styleable.SlideUnlockView_thumbTextStyle -> {
+                thumbContentTexStyle =
+                    array.getInt(
+                        indexValue,
+                        TextStyle.DEFAULT.value.style
+                    ).let {
+                        TextStyle.parse(it)
+                    }
+            }
+            R.styleable.SlideUnlockView_thumbType -> {
+                thumbType =
+                    array.getInt(
+                        indexValue,
+                        ThumbType.DRAWABLE.value
+                    ).let {
+                        ThumbType.parse(it)
+                    }
+            }
+            R.styleable.SlideUnlockView_thumbShape -> {
+                thumbShape =
+                    array.getInt(indexValue, ThumbShape.CIRCLE.value).let {
+                        ThumbShape.parse(it)
+                    }
+            }
+            R.styleable.SlideUnlockView_resilienceDuration -> {
+                resilienceDuration = array.getInt(indexValue, 500)
+            }
+            R.styleable.SlideUnlockView_unlockLockText -> {
+                unlockLockText = array.getString(indexValue)
+            }
+            R.styleable.SlideUnlockView_unlockLockTextSize -> {
+                unlockTextSize =
+                    array.getDimensionPixelSize(indexValue, 12)
+            }
+            R.styleable.SlideUnlockView_unlockLockTextColor -> {
+                unlockLockTextColor =
+                    array.getColor(indexValue, Color.WHITE)
+            }
+            R.styleable.SlideUnlockView_unlockLockTextShineColor -> {
+                unlockLockTextShineColor =
+                    array.getColor(indexValue, Color.WHITE)
+            }
+            R.styleable.SlideUnlockView_unlockLockTextStyle -> {
+                unlockLockTextStyle =
+                    array.getInt(
+                        indexValue,
+                        TextStyle.DEFAULT.value.style
+                    ).let {
+                        TextStyle.parse(it)
+                    }
+            }
+            R.styleable.SlideUnlockView_shineDuration -> {
+                shineDuration = array.getInt(indexValue, 3000)
+            }
+            R.styleable.SlideUnlockView_shineEffect -> {
+                shineEffect = array.getBoolean(indexValue, false)
+            }
+        }
+        return drawable1
     }
 
 
@@ -400,16 +495,19 @@ open class SlideUnlockView : View {
      * @return
      */
     private fun measureSize(measureSpec: Int, defaultSize: Int): Int {
-        var result: Int
         val mode = MeasureSpec.getMode(measureSpec)
         val size = MeasureSpec.getSize(measureSpec)
-        if (mode == MeasureSpec.EXACTLY) {
-            result = size
-        } else {
-            result = defaultSize
-            if (mode == MeasureSpec.AT_MOST) result = result.coerceAtMost(size)
+        return when (mode) {
+            MeasureSpec.AT_MOST -> {
+                size or MEASURED_STATE_TOO_SMALL
+            }
+            MeasureSpec.EXACTLY -> {
+                size
+            }
+            else -> {
+                defaultSize
+            }
         }
-        return result
     }
 
     /**
@@ -444,6 +542,12 @@ open class SlideUnlockView : View {
         thumbLeftBorder = paddingLeft.toFloat()
         thumbRightBorder = width - paddingRight.toFloat()
         thumbLeftX = thumbLeftBorder
+        if (thumbShape == ThumbShape.CIRCLE) {
+            thumbBackgroundWidth = (height - paddingTop - paddingBottom).toFloat()
+        }
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
+        thumbStartLeftX = thumbLeftX
+        thumbStartRightX = thumbRightX
         resetTrackPath()
         resetThumbPath()
     }
@@ -503,11 +607,12 @@ open class SlideUnlockView : View {
      */
     protected open fun resetThumbContentPath() {
         if (thumbType == ThumbType.TEXT) {
-
+            // todo do noting
         } else {
             resetThumbDrawablePath()
         }
     }
+
 
     /**
      * 滑块背景图形路径配置
@@ -531,11 +636,11 @@ open class SlideUnlockView : View {
     protected open fun resetSquareThumbBackgroundPath() {
         //确定滑块绘制坐标和范围
         thumbBackgroundRoundCorner = height.toFloat()
-        thumbBackgroundRectF.right = thumbBackgroundRectF.left + thumbBackgroundWidth
+        thumbBackgroundRectF.right = thumbRightX
         thumbBackgroundPath.addRoundRect(
             thumbBackgroundRectF,
-            trackRoundCorner,
-            trackRoundCorner,
+            thumbBackgroundRoundCorner,
+            thumbBackgroundRoundCorner,
             Path.Direction.CW
         )
     }
@@ -546,11 +651,10 @@ open class SlideUnlockView : View {
      */
     protected open fun resetCircleThumbBackgroundPath() {
         //确定滑块绘制坐标和范围
-        thumbBackgroundWidth = thumbBackgroundRectF.height()
         val radius = thumbBackgroundWidth / 2
         val cx = thumbBackgroundRectF.left + radius
         val cy = thumbBackgroundRectF.top + radius
-        thumbBackgroundRectF.right = thumbBackgroundRectF.left + thumbBackgroundWidth
+        thumbBackgroundRectF.right = thumbRightX
         thumbBackgroundPath.addCircle(cx, cy, radius, Path.Direction.CW)
     }
 
@@ -580,9 +684,8 @@ open class SlideUnlockView : View {
             val scale = calculateScale(it, iconWidth, iconHeight)
             val srcWidth: Float = it.width * scale
             val srcHeight: Float = it.height * scale
-            thumbDrawDrawableRectF.left =
-                thumbBackgroundRectF.left + (thumbBackgroundWidth - srcWidth) / 2
-            thumbDrawDrawableRectF.right = thumbDrawDrawableRectF.left + srcWidth
+            thumbDrawDrawableRectF.right = thumbRightX - thumbBackgroundWidth / 2 + srcWidth / 2
+            thumbDrawDrawableRectF.left = thumbDrawDrawableRectF.right - srcWidth
             thumbDrawDrawableRectF.top = thumbBackgroundRectF.top + (thumbHeight - srcHeight) / 2
             thumbDrawDrawableRectF.bottom = thumbDrawDrawableRectF.top + srcHeight
             if (thumbDrawDrawable == null) {
@@ -625,13 +728,12 @@ open class SlideUnlockView : View {
      */
     private fun resetCircleThumbDrawablePath() {
         val radius = thumbBackgroundWidth / 2
-        val cx = thumbBackgroundRectF.left + radius
         val cy = thumbBackgroundRectF.top + radius
         //确定图片位置和大小
         var iconSize: Float = thumbBackgroundWidth - (thumbPadding * 2f)
+        thumbDrawDrawableRectF.right = thumbRightX - thumbPadding
+        thumbDrawDrawableRectF.left = thumbDrawDrawableRectF.right - iconSize
         (iconSize / 2).let {
-            thumbDrawDrawableRectF.left = cx - it
-            thumbDrawDrawableRectF.right = cx + it
             thumbDrawDrawableRectF.top = cy - it
             thumbDrawDrawableRectF.bottom = cy + it
             if (thumbDrawDrawable == null) {
@@ -668,6 +770,7 @@ open class SlideUnlockView : View {
      * @param canvas Canvas?
      */
     protected open fun onDrawUnlockLockText(canvas: Canvas?) {
+        onShowUnLockText()
         if (shineEffect && !shineAnimator.isRunning) {
             unlockLockTextPaint.shader = gradient
             shineAnimator.start()
@@ -684,7 +787,7 @@ open class SlideUnlockView : View {
      * 绘制滑块背景
      * @param canvas Canvas?
      */
-    private fun onDrawThumbBackground(canvas: Canvas?) {
+    protected open fun onDrawThumbBackground(canvas: Canvas?) {
         canvas?.drawPath(thumbBackgroundPath, thumbBackgroundPaint)
     }
 
@@ -694,9 +797,10 @@ open class SlideUnlockView : View {
      */
     protected open fun onDrawThumbContent(canvas: Canvas?) {
         if (thumbType == ThumbType.TEXT) {
+            resetThumbTextPosition()
             canvas?.drawText(
                 thumbContentText,
-                thumbBackgroundRectF.centerX() - thumbContentTextWidth / 2,
+                thumbContentTextDrawX,
                 thumbContentTextDrawY,
                 thumbContentTextPaint
             )
@@ -710,6 +814,13 @@ open class SlideUnlockView : View {
         }
     }
 
+    /**
+     * 计算滑块文字绘制X轴位置
+     */
+    protected open fun resetThumbTextPosition() {
+        thumbContentTextDrawX = thumbBackgroundRectF.centerX() - thumbContentTextWidth / 2
+    }
+
 
     /**
      * 滑动事件拦截，处理滑动效果
@@ -720,16 +831,37 @@ open class SlideUnlockView : View {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 slidingStarX = event.x
+                slidingStarY = event.y
             }
             MotionEvent.ACTION_MOVE -> {
-                setThumbScrollEffect(event)
-                postInvalidate()
+                if (isInScrollRange(slidingStarX, slidingStarY)) {
+                    setThumbMoveEffect(event)
+                    resetThumbPath()
+                    setSlideUnlockProgress()
+                    postInvalidate()
+                }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                setSlideUnlockResult()
+                if (isInScrollRange(slidingStarX, slidingStarY)) {
+                    setSlideUnlockResult()
+                    slidingStarX = 0f
+                    slidingStarY = 0f
+                }
+
             }
         }
         return true
+    }
+
+    /**
+     * 设置解锁进度
+     */
+    protected open fun setSlideUnlockProgress() {
+        unlockCallback?.run {
+            val distance = thumbRightBorder - thumbStartRightX
+            val distanceProgress = thumbRightX - thumbStartRightX
+            onSlideUnlockProgress(this@SlideUnlockView, distanceProgress / distance)
+        }
     }
 
     /**
@@ -737,7 +869,7 @@ open class SlideUnlockView : View {
      */
     protected open fun setSlideUnlockResult() {
         if (thumbBackgroundRectF.right >= thumbRightBorder) {
-            unlockCallback?.onSlideUnlock(true)
+            unlockCallback?.onSlideUnlockComplete(this)
         } else {
             slidingDistance = thumbBackgroundRectF.left - thumbLeftBorder
             springAnimator.start()
@@ -757,7 +889,7 @@ open class SlideUnlockView : View {
      * 设置滑块移动位置效果
      * @param event MotionEvent
      */
-    protected open fun setThumbScrollEffect(event: MotionEvent) {
+    protected open fun setThumbMoveEffect(event: MotionEvent) {
         slidingDistance = event.x - slidingStarX
         thumbLeftX += slidingDistance
         if (thumbLeftX > thumbRightBorder - thumbBackgroundWidth) {
@@ -767,7 +899,56 @@ open class SlideUnlockView : View {
             thumbLeftX = thumbLeftBorder
         }
         slidingStarX = event.x
-        resetThumbPath()
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
+    }
+
+    /**
+     * 判断是否显示解锁提示文字
+     */
+    protected open fun onShowUnLockText() {
+        if (thumbLeftX > thumbLeftBorder) {
+            unlockLockTextPaint.alpha = 0
+        } else {
+            unlockLockTextPaint.alpha = 255
+        }
+    }
+
+
+    /**
+     * 处理滑动时间冲突
+     * @param event MotionEvent
+     * @return Boolean
+     */
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        val x = event.x.toInt()
+        val y = event.y.toInt()
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                firstX = x
+                firstY = y
+            }
+            MotionEvent.ACTION_MOVE -> {
+                distanceX = abs(x - firstX)
+                distanceY = abs(y - firstY)
+                if (distanceX > touchSlop && distanceX > distanceY) {
+                    parent.requestDisallowInterceptTouchEvent(true)
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                firstX = 0
+                firstY = 0
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
+
+    /**
+     * 手指是否在滑块按钮上
+     * @return Boolean
+     */
+    private fun isInScrollRange(x: Float, y: Float): Boolean {
+        return thumbBackgroundRectF.contains(x, y)
     }
 
 
