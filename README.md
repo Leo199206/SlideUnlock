@@ -15,7 +15,7 @@
 
 
 #### 效果预览
-<img src="https://raw.githubusercontent.com/Leo199206/SlideUnlock/main/image/device-2021-03-02-215628.gif" width="300" heght="500" align=center />
+<img src="https://raw.githubusercontent.com/Leo199206/SlideUnlock/main/image/device-2021-03-02-220844.gif" width="300" heght="500" align=center />
 
 
 #### 依赖
