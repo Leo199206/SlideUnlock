@@ -134,6 +134,8 @@ open class SlideUnlockView : View {
      * @see thumbRightBorder 滑块绘制最右侧边界
      * @see thumbLeftX 滑块左侧起始X轴位置
      * @see thumbRightX 滑块右侧结束X轴位置
+     * @see thumbStartLeftX 滑块默认左侧起始X轴位置
+     * @see thumbStartRightX 滑块默认右侧起始X轴位置
      * @see resilienceDuration 滑动解锁失败，滑块回弹动画时长
      * @see slidingDistance 滑块移动间距
      * @see slidingStarX 滑块按下时的起始X轴
@@ -166,6 +168,8 @@ open class SlideUnlockView : View {
     protected open var thumbBackgroundWidth: Float = 100f
     protected open var thumbLeftBorder: Float = 0f
     protected open var thumbRightBorder: Float = 0f
+    protected open var thumbStartLeftX: Float = 0f
+    protected open var thumbStartRightX: Float = 0f
     protected open var thumbLeftX: Float = 0f
     protected open var thumbRightX: Float = 0f
     protected open var thumbDrawable: Bitmap? = null
@@ -225,12 +229,13 @@ open class SlideUnlockView : View {
             duration = this@SlideUnlockView.resilienceDuration.toLong()
             addUpdateListener {
                 setSpringEffect(it.animatedValue as Float)
+                setSlideUnlockProgress()
+                resetThumbPath()
                 postInvalidate()
             }
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
-                    unlockCallback?.onSlideUnlock(false)
                     slidingDistance = 0f
                 }
             })
@@ -244,7 +249,6 @@ open class SlideUnlockView : View {
     protected open fun setSpringEffect(value: Float) {
         thumbLeftX = thumbLeftBorder + slidingDistance * value
         thumbRightX = thumbLeftX + thumbBackgroundWidth
-        resetThumbPath()
     }
 
 
@@ -542,6 +546,8 @@ open class SlideUnlockView : View {
             thumbBackgroundWidth = (height - paddingTop - paddingBottom).toFloat()
         }
         thumbRightX = thumbLeftX + thumbBackgroundWidth
+        thumbStartLeftX = thumbLeftX
+        thumbStartRightX = thumbRightX
         resetTrackPath()
         resetThumbPath()
     }
@@ -830,6 +836,8 @@ open class SlideUnlockView : View {
             MotionEvent.ACTION_MOVE -> {
                 if (isInScrollRange(slidingStarX, slidingStarY)) {
                     setThumbMoveEffect(event)
+                    resetThumbPath()
+                    setSlideUnlockProgress()
                     postInvalidate()
                 }
             }
@@ -846,11 +854,22 @@ open class SlideUnlockView : View {
     }
 
     /**
+     * 设置解锁进度
+     */
+    protected open fun setSlideUnlockProgress() {
+        unlockCallback?.run {
+            val distance = thumbRightBorder - thumbStartRightX
+            val distanceProgress = thumbRightX - thumbStartRightX
+            onSlideUnlockProgress(this@SlideUnlockView, distanceProgress / distance)
+        }
+    }
+
+    /**
      * 设置滑动解锁结果
      */
     protected open fun setSlideUnlockResult() {
         if (thumbBackgroundRectF.right >= thumbRightBorder) {
-            unlockCallback?.onSlideUnlock(true)
+            unlockCallback?.onSlideUnlockComplete(this)
         } else {
             slidingDistance = thumbBackgroundRectF.left - thumbLeftBorder
             springAnimator.start()
@@ -881,7 +900,6 @@ open class SlideUnlockView : View {
         }
         slidingStarX = event.x
         thumbRightX = thumbLeftX + thumbBackgroundWidth
-        resetThumbPath()
     }
 
     /**

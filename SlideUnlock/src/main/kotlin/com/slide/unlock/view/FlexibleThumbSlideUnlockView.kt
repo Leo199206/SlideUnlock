@@ -36,7 +36,6 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
             thumbRightX = thumbLeftX + thumbBackgroundWidth
         }
         slidingStarX = event.x
-        resetThumbPath()
     }
 
     /**
@@ -45,7 +44,6 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      */
     override fun setSpringEffect(value: Float) {
         thumbRightX = thumbLeftX + thumbBackgroundWidth + (slidingDistance * value)
-        resetThumbPath()
     }
 
     /**
@@ -53,7 +51,7 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      */
     override fun setSlideUnlockResult() {
         if (thumbBackgroundRectF.right >= thumbRightBorder) {
-            unlockCallback?.onSlideUnlock(true)
+            unlockCallback?.onSlideUnlockComplete(this)
         } else {
             slidingDistance = thumbBackgroundRectF.right - thumbLeftX - thumbBackgroundWidth
             springAnimator.start()

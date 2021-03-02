@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.slide.unlock.OnSlideUnlockCallback
+import com.slide.unlock.view.SlideUnlockView
 import kotlinx.android.synthetic.main.activity_main.*
 
 /**
@@ -31,9 +32,11 @@ class MainActivity : AppCompatActivity(), OnSlideUnlockCallback {
         slide_style12.setSlideUnlockCallback(this)
     }
 
-    override fun onSlideUnlock(success: Boolean) {
-        if (success) {
-            Toast.makeText(this, "成功", Toast.LENGTH_SHORT).show()
-        }
+    override fun onSlideUnlockComplete(view: SlideUnlockView) {
+        Toast.makeText(this, "成功", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onSlideUnlockProgress(view: SlideUnlockView, progress: Float) {
+        tv_progress.text = "解锁进度为:${(progress * 100).toInt()}%"
     }
 }
