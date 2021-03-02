@@ -20,7 +20,6 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
 import com.slide.unlock.*
 import kotlin.math.abs
-import kotlin.math.min
 
 
 /**
@@ -843,9 +842,11 @@ open class SlideUnlockView : View {
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                setSlideUnlockResult()
-                slidingStarX = 0f
-                slidingStarY = 0f
+                if (isInScrollRange(slidingStarX, slidingStarY)) {
+                    setSlideUnlockResult()
+                    slidingStarX = 0f
+                    slidingStarY = 0f
+                }
 
             }
         }
@@ -871,10 +872,8 @@ open class SlideUnlockView : View {
         if (thumbBackgroundRectF.right >= thumbRightBorder) {
             unlockCallback?.onSlideUnlockComplete(this)
         } else {
-            slidingDistance = thumbBackgroundRectF.right - thumbBackgroundWidth - thumbLeftBorder
-            slidingDistance =
-                min(slidingDistance, thumbRightBorder - thumbLeftBorder - thumbBackgroundWidth)
-             springAnimator.start()
+            slidingDistance = thumbBackgroundRectF.right - thumbBackgroundWidth
+            springAnimator.start()
         }
     }
 
@@ -895,15 +894,17 @@ open class SlideUnlockView : View {
         var x = correctThumbX(event)
         slidingDistance = x - slidingStarX
         slidingStarX = x
-        thumbLeftX = thumbRightX - thumbBackgroundWidth
         thumbRightX += slidingDistance
+        thumbLeftX = thumbRightX - thumbBackgroundWidth
         if (thumbRightX > thumbRightBorder) {
             thumbRightX = thumbRightBorder
             thumbLeftX = thumbRightX - thumbBackgroundWidth
+            slidingStarX = thumbRightBorder
         }
         if (thumbLeftX < thumbLeftBorder) {
             thumbLeftX = thumbLeftBorder
-            thumbRightX = thumbLeftBorder + thumbBackgroundWidth
+            thumbRightX = thumbLeftX + thumbBackgroundWidth
+            slidingStarX = 0f
         }
     }
 
@@ -971,7 +972,7 @@ open class SlideUnlockView : View {
      * @return Boolean
      */
     private fun isInScrollRange(x: Float, y: Float): Boolean {
-        return thumbBackgroundRectF.contains(x, y)
+        return thumbBackgroundRectF.contains(x, y) && x >= thumbLeftBorder && x <= thumbRightBorder
     }
 
 
