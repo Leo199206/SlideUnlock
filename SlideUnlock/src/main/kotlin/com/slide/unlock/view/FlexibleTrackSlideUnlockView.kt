@@ -28,11 +28,6 @@ class FlexibleTrackSlideUnlockView : SlideUnlockView {
         super.setThumbMoveEffect(event)
         //滑块移动时，背景长度跟随变化
         resetTrackPath()
-        if (thumbLeftX > thumbLeftBorder) {
-            unlockLockTextPaint.alpha = 0
-        } else {
-            unlockLockTextPaint.alpha = 255
-        }
     }
 
     /**

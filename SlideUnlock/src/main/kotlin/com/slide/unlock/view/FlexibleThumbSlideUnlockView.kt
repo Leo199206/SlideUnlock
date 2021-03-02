@@ -3,7 +3,6 @@ package com.slide.unlock.view
 import android.content.Context
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 
 /**
@@ -28,7 +27,6 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      * @param event MotionEvent
      */
     override fun setThumbMoveEffect(event: MotionEvent) {
-        Log.d("setThumbMoveEffect", "thumbLeftX:${event}")
         slidingDistance = event.x - slidingStarX
         thumbRightX += slidingDistance
         if (thumbRightX > thumbRightBorder) {
@@ -37,9 +35,6 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
         if (thumbRightX < thumbLeftX + thumbBackgroundWidth) {
             thumbRightX = thumbLeftX + thumbBackgroundWidth
         }
-        Log.d("setThumbMoveEffect", "thumbLeftX:${thumbLeftX + thumbBackgroundWidth}")
-        Log.d("setThumbMoveEffect", "thumbRightX:${thumbRightX}")
-        Log.d("setThumbMoveEffect", "thumbRightX:${thumbRightX}")
         slidingStarX = event.x
         resetThumbPath()
     }
@@ -86,4 +81,23 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
             )
         }
     }
+
+    /**
+     * 计算滑块文字绘制X轴位置
+     */
+    override fun resetThumbTextPosition() {
+        thumbContentTextDrawX = thumbBackgroundRectF.right - thumbPadding - thumbContentTextWidth
+    }
+
+    /**
+     * 判断是否显示解锁提示文字
+     */
+    override fun onShowUnLockText() {
+        if (thumbRightX > thumbLeftX + thumbBackgroundWidth) {
+            unlockLockTextPaint.alpha = 0
+        } else {
+            unlockLockTextPaint.alpha = 255
+        }
+    }
+
 }

@@ -129,6 +129,7 @@ open class SlideUnlockView : View {
      * @see shineEffect 是否开启iOS风格效果
      * @see thumbContentTextWidth 滑块文字宽度
      * @see thumbContentTextDrawY 滑块文字绘制Y轴位置
+     * @see thumbContentTextDrawX 滑块文字绘制X轴位置
      * @see thumbContentText 滑块文字
      * @see thumbContentTextHeight 滑块文字高度
      * @see thumbContentTexStyle 滑块文字风格
@@ -142,6 +143,7 @@ open class SlideUnlockView : View {
     protected open var thumbContentTextSize: Float = 10f
     protected open var thumbContentTextWidth: Float = 0f
     protected open var thumbContentTextDrawY: Float = 0f
+    protected open var thumbContentTextDrawX: Float = 0f
     protected open var thumbContentTextHeight: Float = 0f
     protected open var thumbContentTexStyle: TextStyle = TextStyle.DEFAULT
 
@@ -582,11 +584,12 @@ open class SlideUnlockView : View {
      */
     protected open fun resetThumbContentPath() {
         if (thumbType == ThumbType.TEXT) {
-            //todo -> do nothing
+            // todo do noting
         } else {
             resetThumbDrawablePath()
         }
     }
+
 
     /**
      * 滑块背景图形路径配置
@@ -746,6 +749,7 @@ open class SlideUnlockView : View {
      * @param canvas Canvas?
      */
     protected open fun onDrawUnlockLockText(canvas: Canvas?) {
+        onShowUnLockText()
         if (shineEffect && !shineAnimator.isRunning) {
             unlockLockTextPaint.shader = gradient
             shineAnimator.start()
@@ -762,7 +766,7 @@ open class SlideUnlockView : View {
      * 绘制滑块背景
      * @param canvas Canvas?
      */
-    private fun onDrawThumbBackground(canvas: Canvas?) {
+    protected open fun onDrawThumbBackground(canvas: Canvas?) {
         canvas?.drawPath(thumbBackgroundPath, thumbBackgroundPaint)
     }
 
@@ -772,9 +776,10 @@ open class SlideUnlockView : View {
      */
     protected open fun onDrawThumbContent(canvas: Canvas?) {
         if (thumbType == ThumbType.TEXT) {
+            resetThumbTextPosition()
             canvas?.drawText(
                 thumbContentText,
-                thumbBackgroundRectF.centerX() - thumbContentTextWidth / 2,
+                thumbContentTextDrawX,
                 thumbContentTextDrawY,
                 thumbContentTextPaint
             )
@@ -786,6 +791,13 @@ open class SlideUnlockView : View {
                 thumbContentDrawablePaint
             )
         }
+    }
+
+    /**
+     * 计算滑块文字绘制X轴位置
+     */
+    protected open fun resetThumbTextPosition() {
+        thumbContentTextDrawX = thumbBackgroundRectF.centerX() - thumbContentTextWidth / 2
     }
 
 
@@ -847,6 +859,17 @@ open class SlideUnlockView : View {
         slidingStarX = event.x
         thumbRightX = thumbLeftX + thumbBackgroundWidth
         resetThumbPath()
+    }
+
+    /**
+     * 判断是否显示解锁提示文字
+     */
+    protected open fun onShowUnLockText() {
+        if (thumbLeftX > thumbLeftBorder) {
+            unlockLockTextPaint.alpha = 0
+        } else {
+            unlockLockTextPaint.alpha = 255
+        }
     }
 
 
