@@ -8,7 +8,7 @@ import android.view.MotionEvent
  * <pre>
  *   @author : leo
  *   @time   : 2021/02/23
- *   @desc   : iOS 滑动解锁效果
+ *   @desc   : iOS 滑动解锁，背景收缩效果
  * </pre>
  */
 class FlexibleTrackSlideUnlockView : SlideUnlockView {
@@ -24,8 +24,8 @@ class FlexibleTrackSlideUnlockView : SlideUnlockView {
      * 设置滑块移动效果
      * @param event MotionEvent
      */
-    override fun setThumbScrollEffect(event: MotionEvent) {
-        super.setThumbScrollEffect(event)
+    override fun setThumbMoveEffect(event: MotionEvent) {
+        super.setThumbMoveEffect(event)
         //滑块移动时，背景长度跟随变化
         resetTrackPath()
         if (thumbLeftX > thumbLeftBorder) {

@@ -119,7 +119,8 @@ open class SlideUnlockView : View {
      * @see thumbBackgroundWidth 滑块宽度
      * @see thumbLeftBorder  滑块绘制最左侧边界
      * @see thumbRightBorder 滑块绘制最右侧边界
-     * @see thumbLeftX 滑块左侧其实X轴位置
+     * @see thumbLeftX 滑块左侧起始X轴位置
+     * @see thumbRightX 滑块右侧结束X轴位置
      * @see resilienceDuration 滑动解锁失败，滑块回弹动画时长
      * @see slidingDistance 滑块移动间距
      * @see slidingStarX 滑块按下时的起始X轴
@@ -151,6 +152,7 @@ open class SlideUnlockView : View {
     protected open var thumbLeftBorder: Float = 0f
     protected open var thumbRightBorder: Float = 0f
     protected open var thumbLeftX: Float = 0f
+    protected open var thumbRightX: Float = 0f
     protected open var thumbDrawable: Bitmap? = null
     protected open var thumbDrawDrawable: Bitmap? = null
     protected open val thumbDrawDrawableRectF: RectF by lazy { RectF() }
@@ -225,6 +227,7 @@ open class SlideUnlockView : View {
      */
     protected open fun setSpringEffect(value: Float) {
         thumbLeftX = thumbLeftBorder + slidingDistance * value
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
         resetThumbPath()
     }
 
@@ -516,6 +519,10 @@ open class SlideUnlockView : View {
         thumbLeftBorder = paddingLeft.toFloat()
         thumbRightBorder = width - paddingRight.toFloat()
         thumbLeftX = thumbLeftBorder
+        if (thumbShape == ThumbShape.CIRCLE) {
+            thumbBackgroundWidth = (height - paddingTop - paddingBottom).toFloat()
+        }
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
         resetTrackPath()
         resetThumbPath()
     }
@@ -575,7 +582,7 @@ open class SlideUnlockView : View {
      */
     protected open fun resetThumbContentPath() {
         if (thumbType == ThumbType.TEXT) {
-
+            //todo -> do nothing
         } else {
             resetThumbDrawablePath()
         }
@@ -603,7 +610,7 @@ open class SlideUnlockView : View {
     protected open fun resetSquareThumbBackgroundPath() {
         //确定滑块绘制坐标和范围
         thumbBackgroundRoundCorner = height.toFloat()
-        thumbBackgroundRectF.right = thumbBackgroundRectF.left + thumbBackgroundWidth
+        thumbBackgroundRectF.right = thumbRightX
         thumbBackgroundPath.addRoundRect(
             thumbBackgroundRectF,
             trackRoundCorner,
@@ -618,11 +625,10 @@ open class SlideUnlockView : View {
      */
     protected open fun resetCircleThumbBackgroundPath() {
         //确定滑块绘制坐标和范围
-        thumbBackgroundWidth = thumbBackgroundRectF.height()
         val radius = thumbBackgroundWidth / 2
         val cx = thumbBackgroundRectF.left + radius
         val cy = thumbBackgroundRectF.top + radius
-        thumbBackgroundRectF.right = thumbBackgroundRectF.left + thumbBackgroundWidth
+        thumbBackgroundRectF.right = thumbRightX
         thumbBackgroundPath.addCircle(cx, cy, radius, Path.Direction.CW)
     }
 
@@ -794,7 +800,7 @@ open class SlideUnlockView : View {
                 slidingStarX = event.x
             }
             MotionEvent.ACTION_MOVE -> {
-                setThumbScrollEffect(event)
+                setThumbMoveEffect(event)
                 postInvalidate()
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -829,7 +835,7 @@ open class SlideUnlockView : View {
      * 设置滑块移动位置效果
      * @param event MotionEvent
      */
-    protected open fun setThumbScrollEffect(event: MotionEvent) {
+    protected open fun setThumbMoveEffect(event: MotionEvent) {
         slidingDistance = event.x - slidingStarX
         thumbLeftX += slidingDistance
         if (thumbLeftX > thumbRightBorder - thumbBackgroundWidth) {
@@ -839,6 +845,7 @@ open class SlideUnlockView : View {
             thumbLeftX = thumbLeftBorder
         }
         slidingStarX = event.x
+        thumbRightX = thumbLeftX + thumbBackgroundWidth
         resetThumbPath()
     }
 
