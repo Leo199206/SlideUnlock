@@ -33,10 +33,13 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
         thumbRightX += slidingDistance
         if (thumbRightX > thumbRightBorder) {
             thumbRightX = thumbRightBorder
+            slidingStarX = thumbRightBorder
         }
-        if (thumbRightX < thumbLeftX + thumbBackgroundWidth) {
-            thumbRightX = thumbLeftX + thumbBackgroundWidth
+        if (thumbRightX < thumbLeftBorder + thumbBackgroundWidth) {
+            thumbRightX = thumbLeftBorder + thumbBackgroundWidth
+            slidingStarX = thumbRightX
         }
+
     }
 
 
@@ -54,13 +57,15 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      */
     override fun resetCircleThumbBackgroundPath() {
         //确定滑块绘制坐标和范围
-        thumbBackgroundRectF.right = thumbRightX
-        if (thumbRightX <= thumbLeftX + thumbBackgroundWidth) {
+        if (thumbRightX < thumbLeftBorder + thumbBackgroundWidth) {
             val radius = thumbBackgroundWidth / 2
             val cx = thumbBackgroundRectF.left + radius
             val cy = thumbBackgroundRectF.top + radius
+            thumbRightX = thumbLeftBorder + thumbBackgroundWidth
+            thumbBackgroundRectF.right = thumbLeftBorder + thumbBackgroundWidth
             thumbBackgroundPath.addCircle(cx, cy, radius, Path.Direction.CW)
         } else {
+            thumbBackgroundRectF.right = thumbRightX
             thumbBackgroundRoundCorner = trackRoundCorner
             thumbBackgroundPath.addRoundRect(
                 thumbBackgroundRectF,
@@ -75,7 +80,8 @@ class FlexibleThumbSlideUnlockView : SlideUnlockView {
      * 计算滑块文字绘制X轴位置
      */
     override fun resetThumbTextPosition() {
-        thumbContentTextDrawX = thumbBackgroundRectF.right - thumbPadding - thumbContentTextWidth
+        thumbContentTextDrawX =
+            thumbBackgroundRectF.right - thumbBackgroundWidth / 2 - thumbContentTextWidth / 2
     }
 
     /**
