@@ -11,6 +11,7 @@ import android.text.TextPaint
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.view.animation.LinearInterpolator
 import androidx.annotation.ColorInt
 import androidx.annotation.Px
@@ -40,11 +41,20 @@ open class SlideUnlockView : View {
         initPaint()
     }
 
+    private var distanceY: Int = 0
+    private var distanceX: Int = 0
+    private var firstY: Int = 0
+    private var firstX: Int = 0
+    private val touchSlop: Int by lazy {
+        ViewConfiguration.get(context).scaledTouchSlop
+    }
+
     /**
      * 解锁控件背景参数
      * @see unlockCallback 解锁结果回调
      * @see trackPaint 背景画笔
      * @see trackRoundCorner 背景圆角大小
+     * @see trackPadding 背景内边距
      * @see trackBgColor 背景颜色
      * @see trackRectF 背景绘制区域
      * @see trackPath 背景绘制路径
@@ -54,6 +64,9 @@ open class SlideUnlockView : View {
 
     @Px
     protected open var trackRoundCorner: Float = 0f
+
+    @Px
+    protected open var trackPadding: Int = 0
 
     @ColorInt
     protected open var trackBgColor: Int = Color.WHITE
@@ -168,6 +181,7 @@ open class SlideUnlockView : View {
     protected open var resilienceDuration: Int = 500
     protected open var slidingDistance: Float = 0f
     protected open var slidingStarX: Float = 0f
+    protected open var slidingStarY: Float = 0f
     protected open var shineEffect: Boolean = false
     protected open val springAnimator: ValueAnimator by lazy {
         createSpringAnimator()
@@ -213,11 +227,11 @@ open class SlideUnlockView : View {
                 setSpringEffect(it.animatedValue as Float)
                 postInvalidate()
             }
-
             addListener(object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator?) {
                     super.onAnimationEnd(animation)
                     unlockCallback?.onSlideUnlock(false)
+                    slidingDistance = 0f
                 }
             })
         }
@@ -477,16 +491,19 @@ open class SlideUnlockView : View {
      * @return
      */
     private fun measureSize(measureSpec: Int, defaultSize: Int): Int {
-        var result: Int
         val mode = MeasureSpec.getMode(measureSpec)
         val size = MeasureSpec.getSize(measureSpec)
-        if (mode == MeasureSpec.EXACTLY) {
-            result = size
-        } else {
-            result = defaultSize
-            if (mode == MeasureSpec.AT_MOST) result = result.coerceAtMost(size)
+        return when (mode) {
+            MeasureSpec.AT_MOST -> {
+                size or MEASURED_STATE_TOO_SMALL
+            }
+            MeasureSpec.EXACTLY -> {
+                size
+            }
+            else -> {
+                defaultSize
+            }
         }
-        return result
     }
 
     /**
@@ -661,9 +678,8 @@ open class SlideUnlockView : View {
             val scale = calculateScale(it, iconWidth, iconHeight)
             val srcWidth: Float = it.width * scale
             val srcHeight: Float = it.height * scale
-            thumbDrawDrawableRectF.left =
-                thumbBackgroundRectF.left + (thumbBackgroundWidth - srcWidth) / 2
-            thumbDrawDrawableRectF.right = thumbDrawDrawableRectF.left + srcWidth
+            thumbDrawDrawableRectF.right = thumbRightX - thumbBackgroundWidth / 2 + srcWidth / 2
+            thumbDrawDrawableRectF.left = thumbDrawDrawableRectF.right - srcWidth
             thumbDrawDrawableRectF.top = thumbBackgroundRectF.top + (thumbHeight - srcHeight) / 2
             thumbDrawDrawableRectF.bottom = thumbDrawDrawableRectF.top + srcHeight
             if (thumbDrawDrawable == null) {
@@ -706,13 +722,12 @@ open class SlideUnlockView : View {
      */
     private fun resetCircleThumbDrawablePath() {
         val radius = thumbBackgroundWidth / 2
-        val cx = thumbBackgroundRectF.left + radius
         val cy = thumbBackgroundRectF.top + radius
         //确定图片位置和大小
         var iconSize: Float = thumbBackgroundWidth - (thumbPadding * 2f)
+        thumbDrawDrawableRectF.right = thumbRightX - thumbPadding
+        thumbDrawDrawableRectF.left = thumbDrawDrawableRectF.right - iconSize
         (iconSize / 2).let {
-            thumbDrawDrawableRectF.left = cx - it
-            thumbDrawDrawableRectF.right = cx + it
             thumbDrawDrawableRectF.top = cy - it
             thumbDrawDrawableRectF.bottom = cy + it
             if (thumbDrawDrawable == null) {
@@ -810,13 +825,21 @@ open class SlideUnlockView : View {
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 slidingStarX = event.x
+                slidingStarY = event.y
             }
             MotionEvent.ACTION_MOVE -> {
-                setThumbMoveEffect(event)
-                postInvalidate()
+                if (isInScrollRange(slidingStarX, slidingStarY)) {
+                    setThumbMoveEffect(event)
+                    postInvalidate()
+                }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                setSlideUnlockResult()
+                if (isInScrollRange(slidingStarX, slidingStarY)) {
+                    setSlideUnlockResult()
+                    slidingStarX = 0f
+                    slidingStarY = 0f
+                }
+
             }
         }
         return true
@@ -870,6 +893,44 @@ open class SlideUnlockView : View {
         } else {
             unlockLockTextPaint.alpha = 255
         }
+    }
+
+
+    /**
+     * 处理滑动时间冲突
+     * @param event MotionEvent
+     * @return Boolean
+     */
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        val x = event.x.toInt()
+        val y = event.y.toInt()
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                firstX = x
+                firstY = y
+            }
+            MotionEvent.ACTION_MOVE -> {
+                distanceX = abs(x - firstX)
+                distanceY = abs(y - firstY)
+                if (distanceX > touchSlop && distanceX > distanceY) {
+                    parent.requestDisallowInterceptTouchEvent(true)
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                firstX = 0
+                firstY = 0
+            }
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
+
+    /**
+     * 手指是否在滑块按钮上
+     * @return Boolean
+     */
+    private fun isInScrollRange(x: Float, y: Float): Boolean {
+        return thumbBackgroundRectF.contains(x, y)
     }
 
 

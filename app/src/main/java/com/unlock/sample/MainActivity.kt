@@ -1,8 +1,8 @@
 package com.unlock.sample
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.slide.unlock.OnSlideUnlockCallback
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -17,17 +17,23 @@ class MainActivity : AppCompatActivity(), OnSlideUnlockCallback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        slide_circle.setSlideUnlockCallback(this)
-        slide_square.setSlideUnlockCallback(this)
-        slide_ios_circle.setSlideUnlockCallback(this)
-        slide_ios_square.setSlideUnlockCallback(this)
-        slide_ios_close.setSlideUnlockCallback(this)
-        slide_close.setSlideUnlockCallback(this)
+        slide_style1.setSlideUnlockCallback(this)
+        slide_style2.setSlideUnlockCallback(this)
+        slide_style3.setSlideUnlockCallback(this)
+        slide_style4.setSlideUnlockCallback(this)
+        slide_style5.setSlideUnlockCallback(this)
+        slide_style6.setSlideUnlockCallback(this)
+        slide_style7.setSlideUnlockCallback(this)
+        slide_style8.setSlideUnlockCallback(this)
+        slide_style9.setSlideUnlockCallback(this)
+        slide_style10.setSlideUnlockCallback(this)
+        slide_style11.setSlideUnlockCallback(this)
+        slide_style12.setSlideUnlockCallback(this)
     }
 
     override fun onSlideUnlock(success: Boolean) {
         if (success) {
-            Toast.makeText(this, "解锁成功", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "成功", Toast.LENGTH_SHORT).show()
         }
     }
 }
