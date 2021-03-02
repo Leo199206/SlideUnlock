@@ -20,6 +20,7 @@ import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
 import com.slide.unlock.*
 import kotlin.math.abs
+import kotlin.math.min
 
 
 /**
@@ -842,16 +843,15 @@ open class SlideUnlockView : View {
                 }
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                if (isInScrollRange(slidingStarX, slidingStarY)) {
-                    setSlideUnlockResult()
-                    slidingStarX = 0f
-                    slidingStarY = 0f
-                }
+                setSlideUnlockResult()
+                slidingStarX = 0f
+                slidingStarY = 0f
 
             }
         }
         return true
     }
+
 
     /**
      * 设置解锁进度
@@ -871,8 +871,10 @@ open class SlideUnlockView : View {
         if (thumbBackgroundRectF.right >= thumbRightBorder) {
             unlockCallback?.onSlideUnlockComplete(this)
         } else {
-            slidingDistance = thumbBackgroundRectF.left - thumbLeftBorder
-            springAnimator.start()
+            slidingDistance = thumbBackgroundRectF.right - thumbBackgroundWidth - thumbLeftBorder
+            slidingDistance =
+                min(slidingDistance, thumbRightBorder - thumbLeftBorder - thumbBackgroundWidth)
+             springAnimator.start()
         }
     }
 
@@ -890,16 +892,19 @@ open class SlideUnlockView : View {
      * @param event MotionEvent
      */
     protected open fun setThumbMoveEffect(event: MotionEvent) {
-        slidingDistance = event.x - slidingStarX
-        thumbLeftX += slidingDistance
-        if (thumbLeftX > thumbRightBorder - thumbBackgroundWidth) {
-            thumbLeftX = thumbRightBorder - thumbBackgroundWidth
+        var x = correctThumbX(event)
+        slidingDistance = x - slidingStarX
+        slidingStarX = x
+        thumbLeftX = thumbRightX - thumbBackgroundWidth
+        thumbRightX += slidingDistance
+        if (thumbRightX > thumbRightBorder) {
+            thumbRightX = thumbRightBorder
+            thumbLeftX = thumbRightX - thumbBackgroundWidth
         }
         if (thumbLeftX < thumbLeftBorder) {
             thumbLeftX = thumbLeftBorder
+            thumbRightX = thumbLeftBorder + thumbBackgroundWidth
         }
-        slidingStarX = event.x
-        thumbRightX = thumbLeftX + thumbBackgroundWidth
     }
 
     /**
@@ -942,6 +947,24 @@ open class SlideUnlockView : View {
         return super.dispatchTouchEvent(event)
     }
 
+    /**
+     * 根据是否越界，纠正滑动x轴边界
+     * @param event MotionEvent
+     * @return Float
+     */
+    protected open fun correctThumbX(event: MotionEvent): Float {
+        return when {
+            event.x > thumbRightBorder -> {
+                thumbRightBorder
+            }
+            event.x < thumbLeftBorder -> {
+                thumbLeftBorder
+            }
+            else -> {
+                event.x
+            }
+        }
+    }
 
     /**
      * 手指是否在滑块按钮上

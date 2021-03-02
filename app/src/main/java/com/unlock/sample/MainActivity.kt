@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity(), OnSlideUnlockCallback {
     }
 
     override fun onSlideUnlockComplete(view: SlideUnlockView) {
-        Toast.makeText(this, "成功", Toast.LENGTH_SHORT).show()
+        tv_progress.text = "解锁成功"
     }
 
     override fun onSlideUnlockProgress(view: SlideUnlockView, progress: Float) {
