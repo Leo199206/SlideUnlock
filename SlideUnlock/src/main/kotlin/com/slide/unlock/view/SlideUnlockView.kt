@@ -861,7 +861,11 @@ open class SlideUnlockView : View {
         unlockCallback?.run {
             val distance = thumbRightBorder - thumbStartRightX
             val distanceProgress = thumbRightX - thumbStartRightX
-            onSlideUnlockProgress(this@SlideUnlockView, distanceProgress / distance)
+            val process = distanceProgress / distance
+            onSlideUnlockProgress(this@SlideUnlockView, process)
+            if (process >= 1f) {
+                onSlideUnlockComplete(this@SlideUnlockView)
+            }
         }
     }
 
@@ -869,9 +873,7 @@ open class SlideUnlockView : View {
      * 设置滑动解锁结果
      */
     protected open fun setSlideUnlockResult() {
-        if (thumbBackgroundRectF.right >= thumbRightBorder) {
-            unlockCallback?.onSlideUnlockComplete(this)
-        } else {
+        if (thumbBackgroundRectF.right < thumbRightBorder) {
             slidingDistance = thumbBackgroundRectF.right - thumbBackgroundWidth
             springAnimator.start()
         }
