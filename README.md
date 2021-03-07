@@ -32,7 +32,7 @@ allprojects {
 + 添加以下maven依赖配置到app模块，gradle文件下
 
 ```
-implementation  'com.github.Leo199206:SlideUnlock:1.0.2'
+implementation  'com.github.Leo199206:SlideUnlock:1.0.3'
 ```
 
 #### 添加到布局
