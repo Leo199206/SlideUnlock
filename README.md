@@ -148,7 +148,7 @@ implementation  'com.github.Leo199206:SlideUnlock:1.0.3'
 | thumbTint | 滑块内容着色颜色 | 
 | thumbDrawable | 滑块内容图片，仅在thumbType为DRAWABLE时有效 | 
 | thumbWidth | 滑块宽度，仅方形滑块有效，圆形滑块宽高默认为去除内边距的控件高度 |
-| thumbText | 仅在thumbType为TEXT时有效 | 
+| thumbText | 滑块中心内容文字，仅在thumbType为TEXT时有效 | 
 | thumbTextStyle | 滑块文字风格，DEFAULT为默认风格，BOLD为粗体 | 
 | thumbType | 滑块内容类型，TEXT为文字，DRAWABLE为图片 | 
 | thumbShape | 滑块形状，CIRCLE为圆形，SQUARE为方形 |

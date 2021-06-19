@@ -27,7 +27,7 @@ class FlexibleTrackSlideUnlockView : SlideUnlockView {
     override fun setThumbMoveEffect(event: MotionEvent) {
         super.setThumbMoveEffect(event)
         //滑块移动时，背景长度跟随变化
-        resetTrackPath()
+        setTrackPath()
     }
 
     /**
@@ -37,7 +37,7 @@ class FlexibleTrackSlideUnlockView : SlideUnlockView {
     override fun setSpringEffect(value: Float) {
         super.setSpringEffect(value)
         //滑块松手回弹时，背景长度跟随变化
-        resetTrackPath()
+        setTrackPath()
         if (value == 0f) {
             unlockLockTextPaint.alpha = 255
         }
