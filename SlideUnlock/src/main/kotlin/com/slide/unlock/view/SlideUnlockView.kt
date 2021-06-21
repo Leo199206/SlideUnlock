@@ -258,7 +258,7 @@ open class SlideUnlockView : View {
      */
     private fun initAttributes(attrs: AttributeSet?) {
         val array = context.obtainStyledAttributes(attrs, R.styleable.SlideUnlockView)
-        initTrackTextAttributes(array)
+        initTrackAttributes(array)
         initLockTextAttributes(array)
         initThumbAttributes(array)
         array.recycle()
@@ -270,7 +270,7 @@ open class SlideUnlockView : View {
      * 背景自定义属性
      * @param array TypedArray
      */
-    private fun initTrackTextAttributes(array: TypedArray) {
+    private fun initTrackAttributes(array: TypedArray) {
         trackBgColor = array.getColor(R.styleable.SlideUnlockView_trackBgColor, Color.WHITE)
         trackRoundCorner = array.getDimension(R.styleable.SlideUnlockView_trackRoundCorner, 0f)
         resilienceDuration = array.getInt(R.styleable.SlideUnlockView_resilienceDuration, 500)
@@ -700,24 +700,17 @@ open class SlideUnlockView : View {
 
 
     /**
-     * 绘制背景
+     * 绘制背景、解锁提示文字、以及滑块
      * @param canvas Canvas
      */
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         canvas?.drawPath(trackPath, trackPaint)
         onDrawUnlockLockText(canvas)
-    }
-
-    /**
-     * 绘制滑块
-     * @param canvas Canvas
-     */
-    override fun onDrawForeground(canvas: Canvas?) {
-        super.onDrawForeground(canvas)
         onDrawThumbBackground(canvas)
         onDrawThumbContent(canvas)
     }
+
 
 
     /**
